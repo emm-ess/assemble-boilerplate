@@ -1,0 +1,20 @@
+{
+  "name": "assemble-boilerplate",
+  "version": "0.1.0",
+  "authors": [
+    "Marten Schälicke <hallo@emm-ess.de>"
+  ],
+  "license": "MIT",
+  "homepage": "emm-ess.de",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "html5shiv": "~3.7.2",
+    "Respond": "~1.4.2"
+  }
+}
