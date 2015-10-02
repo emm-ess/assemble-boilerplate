@@ -1,0 +1,34 @@
+$icon: sprite-map("icon/*.png")
+.icon
+	background-image: sprite-url($icon)
+	background-repeat: no-repeat
+	display: block
+
+@each $name in sprite-names($icon)
+	.icon-#{$name}
+		background-position: sprite-position($icon, $name)
+		$file:  sprite-file($icon, $name)
+		width:  image-width($file)
+		height: image-height($file)
+		&.centered
+			position: relative
+			left: 50%
+			margin-left: - image-width($file) / 2
+		&.centered-v
+			position: relative
+			top: 50%
+			margin-top: - image-height($file) / 2
+
+@media (-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi)
+	$icon2x: sprite-map("icon2x/*.png")
+	.icon
+		background-image: sprite-url($icon2x)
+		@include background-size(ceil(sprite-width($icon2x) / 2) ceil(sprite-height($icon2x) / 2))
+
+	@each $name in sprite-names($icon2x)
+		$pos: sprite-position($icon2x, $name)
+		.icon-#{$name}
+			background-position: nth($pos, 1)   nth($pos, 2) / 2
+			$file:  sprite-file($icon2x, $name)
+			width:  image-width($file) / 2
+			height: image-height($file) / 2

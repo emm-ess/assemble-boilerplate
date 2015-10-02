@@ -37,26 +37,29 @@ module.exports = function(grunt) {
                 tasks: ['newer:assemble', 'copy:html']
             },
             assembleTemplate: {
-                files: ['<%= config.src %>/templates/{,*/}*.hbs','data.json'],
+                files: ['<%= config.src %>/templates/**/*.hbs','data.json'],
                 tasks: ['assemble', 'copy:html']
             },
             coffee: {
                     files: ['<%= config.src %>/coffee/{,*/}*.coffee'],
                     tasks: ['coffee:dist']
             },
-            compass: {
-                    files: ['<%= config.src %>/sass/{,*/}*.{sass,scss}'],
-                    tasks: ['compass:dev']
+            images: {
+                files: ['<%= config.src %>/img/{,*/}*.{jpg,jpeg,png,gif,webm}'],
+                tasks: ['newer:copy:img']
             },
             gruntfile: {
-                files: ['Gruntfile.js']
+                files: ['Gruntfile.js'],
+                options: {
+                    reload: true
+                }
             },
             livereload: {
                 options: {
                     livereload: LIVERELOAD_PORT
                 },
                 files: [
-                    '<%= config.dist %>/**/*.*'
+                    '<%= config.dist %>/**/*'
                 ]
             }
         },
@@ -68,7 +71,7 @@ module.exports = function(grunt) {
                 layoutdir: '<%= config.src %>/templates/layouts/',
                 layout: 'base.hbs',
                 data: 'data.json',
-                partials: '<%= config.src %>/templates/partials/*.hbs'
+                partials: '<%= config.src %>/templates/partials/**/*.hbs'
             },
 
             files: {
@@ -83,16 +86,20 @@ module.exports = function(grunt) {
         connect: {
             options: {
                 port: 9000,
-                hostname: '0.0.0.0'
+                hostname: '0.0.0.0',
+                protocol: 'http'
             },
             livereload: {
                 options: {
-                    middleware: function (connect) {
-                        return [
-                            lrSnippet,
-                            mountFolder(connect, projectConfig.dist)
-                        ];
-                    }
+                    base: '<%= config.dist %>',
+                    livereload: LIVERELOAD_PORT,
+                    open: true
+                    // middleware: function (connect) {
+                    //     return [
+                    //         lrSnippet,
+                    //         mountFolder(connect, projectConfig.dist)
+                    //     ];
+                    // }
                 }
             },
             dist: {
@@ -106,11 +113,11 @@ module.exports = function(grunt) {
             }
         },
 
-        open: {
-            server: {
-                path: 'http://localhost:<%= connect.options.port %>'
-            }
-        },
+        // open: {
+        //     server: {
+        //         path: 'http://localhost:<%= connect.options.port %>'
+        //     }
+        // },
 
         clean: {
             dist: {
@@ -171,6 +178,13 @@ module.exports = function(grunt) {
                 options: {
                     outputStyle: 'expanded',
                     environment: 'development'
+                }
+            },
+            devServe: {
+                options: {
+                    outputStyle: 'expanded',
+                    environment: 'development',
+                    watch: true
                 }
             },
             dist: {
@@ -264,6 +278,8 @@ module.exports = function(grunt) {
             options: {
                 ignore: [
                     /.active/,
+                    /.toggled/,
+                    /.non-visible/,
                     /.gallery.col\-[0-9]/,
                     /swipebox/
                     ]
@@ -318,7 +334,7 @@ module.exports = function(grunt) {
                         '.htaccess',
                         '.htpasswd',
                         'img/{,*/}*.webp',
-                        'fonts/*'
+                        'fonts/**/*'
                     ]
                 },{
                     expand: true,
@@ -368,6 +384,17 @@ module.exports = function(grunt) {
                     ]
                 }]
 
+            },
+            img : {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= config.src %>/img',
+                    dest: '<%= config.dist %>/img',
+                    src: [
+                        '**/*'
+                    ]
+                }]
             }
         },
         concurrent: {
@@ -387,7 +414,11 @@ module.exports = function(grunt) {
                 'imagemin',
                 'svgmin',
                 'cssmin'
-            ]
+            ],
+            watch: [
+                'watch',
+                'compass:devServe'
+            ],
         }
 
     });
@@ -404,17 +435,20 @@ module.exports = function(grunt) {
 
         grunt.task.run([
             'clean:dist',
+            'copy:dist',
+            'copy:img',
             'concurrent:server',
             'copy:html',
-            'copy:dist',
             'connect:livereload',
-            'open:server',
-            'watch'
+            // 'open:server',
+            'concurrent:watch'
         ]);
     });
 
     grunt.registerTask('build', [
         'clean:dist',
+        'copy:dist',
+        'copy:img',
         'concurrent:dist',
         'useminPrepare',
         'concat',
@@ -423,7 +457,6 @@ module.exports = function(grunt) {
         'concurrent:minify',
         'uglify',
         'usemin',
-        'copy:dist',
         'modernizr',
         'clean:temp'
     ]);
