@@ -282,6 +282,10 @@ module.exports = function(grunt) {
                     /.non-visible/,
                     /.gallery.col\-[0-9]/,
                     /swipebox/
+                    ],
+                ignoreSheets : [
+                    /fonts.googleapis/,
+                    /use.typekit/
                     ]
             },
             dist: {
@@ -415,17 +419,15 @@ module.exports = function(grunt) {
                 'svgmin',
                 'cssmin'
             ],
-            watch: [
-                'watch',
-                'compass:devServe'
-            ],
+            watch: {
+                options: { logConcurrentOutput: true },
+                tasks: [
+                    'watch',
+                    'compass:devServe'
+                ]
+            }
         }
 
-    });
-
-    grunt.registerTask('server', function (target) {
-        grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
-        grunt.task.run(['serve:' + target]);
     });
 
     grunt.registerTask('serve', function (target) {
@@ -440,7 +442,6 @@ module.exports = function(grunt) {
             'concurrent:server',
             'copy:html',
             'connect:livereload',
-            // 'open:server',
             'concurrent:watch'
         ]);
     });
@@ -453,7 +454,7 @@ module.exports = function(grunt) {
         'useminPrepare',
         'concat',
         'htmlmin',
-        'uncss',
+        'uncss:dist',
         'concurrent:minify',
         'uglify',
         'usemin',
